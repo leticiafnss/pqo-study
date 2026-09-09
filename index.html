@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#121826">
+  <title>PQO Study — Compliance</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <div id="auth-overlay" class="overlay hidden">
+    <div class="modal auth-card">
+      <div class="logo">P</div>
+      <p class="eyebrow">PQO STUDY</p>
+      <h1 id="auth-title">Entrar</h1>
+      <p class="muted" id="auth-description">Entre com sua conta para continuar exatamente de onde parou, no computador ou no celular.</p>
+      <label id="auth-name-wrap" class="hidden">Nome<input id="auth-name" placeholder="Seu nome"></label>
+      <label>E-mail<input id="auth-email" type="email" placeholder="voce@email.com"></label>
+      <label>Senha<input id="auth-password" type="password" placeholder="Mínimo de 6 caracteres"></label>
+      <button id="auth-submit" class="primary">Entrar</button>
+      <button id="auth-toggle" class="secondary auth-toggle">Ainda não tenho conta</button>
+      <div id="auth-message" class="auth-message hidden"></div>
+      <small>Seu progresso ficará associado à sua conta.</small>
+    </div>
+  </div>
+
+  <div id="onboarding" class="overlay hidden">
+    <div class="modal onboarding-card">
+      <div class="logo">P</div>
+      <p class="eyebrow">PQO STUDY</p>
+      <h1>Monte sua trilha de Compliance</h1>
+      <p class="muted">Informe seus dados e a data da prova. O plano se adapta automaticamente ao tempo que você tem.</p>
+      <label>Como você quer ser chamado(a)?
+        <input id="profile-name" placeholder="Seu nome">
+      </label>
+      <label>E-mail
+        <input id="profile-email" type="email" placeholder="voce@email.com">
+      </label>
+      <label>Data da prova
+        <input id="profile-exam" type="date">
+      </label>
+      <button id="save-profile" class="primary">Criar meu plano</button>
+      <small>Versão inicial: o perfil fica salvo somente neste navegador. Uma conta sincronizada entre dispositivos será a próxima evolução.</small>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand"><span class="logo small">P</span><div><strong>PQO Study</strong><small>Compliance</small></div></div>
+      <nav>
+        <button class="nav active" data-view="dashboard">⌂ <span>Início</span></button>
+        <button class="nav" data-view="trilha">◫ <span>Trilha</span></button>
+        <button class="nav" data-view="plano">◷ <span>Meu plano</span></button>
+        <button class="nav" data-view="flashcards">◇ <span>Flashcards</span></button>
+        <button class="nav" data-view="questoes">✓ <span>Questões</span></button>
+        <button class="nav" data-view="erros">! <span>Erros</span></button>
+        <button class="nav" data-view="fontes">↗ <span>Fontes oficiais</span></button>
+      </nav>
+      <div class="side-bottom">
+        <button id="edit-profile" class="ghost">⚙ Ajustar prova</button>
+        <button id="logout-btn" class="ghost">↪ Sair da conta</button>
+        <div class="sync-status" id="sync-status">● modo local</div>
+        <small>Conteúdo guiado + fontes oficiais</small>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <div><p class="eyebrow" id="hello">PREPARAÇÃO PQO</p><h2 id="page-title">Visão geral</h2></div>
+        <div class="exam-chip"><span>Prova</span><strong id="exam-date-label">—</strong></div>
+      </header>
+
+      <section id="dashboard" class="view active">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">SUA PRÓXIMA AÇÃO</p>
+            <h1 id="hero-title">Comece pelo núcleo de Compliance</h1>
+            <p id="hero-subtitle">O plano vai indicar o que estudar primeiro e recalcular conforme sua data de prova.</p>
+            <button class="primary" id="continue-btn">Continuar estudo</button>
+          </div>
+          <div class="ring-wrap">
+            <div class="ring" id="progress-ring"><span id="progress-pct">0%</span></div>
+            <small>trilha concluída</small>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <article><span>Dias até a prova</span><strong id="days-left">—</strong><small id="pace-label">Defina sua data</small></article>
+          <article><span>Módulos concluídos</span><strong id="modules-done">0/23</strong><small>progresso real</small></article>
+          <article><span>Questões</span><strong id="question-score">0%</strong><small id="question-total">0 respondidas</small></article>
+          <article><span>Revisões pendentes</span><strong id="reviews-due">0</strong><small>flashcards difíceis</small></article>
+        </div>
+
+        <div class="grid2">
+          <article class="card">
+            <div class="card-head"><div><p class="eyebrow">HOJE</p><h3>Plano sugerido</h3></div><button class="text-btn" data-jump="plano">Ver plano</button></div>
+            <div id="today-plan"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><div><p class="eyebrow">PRIORIDADE</p><h3>Núcleo Compliance</h3></div></div>
+            <div class="priority-list">
+              <span>PLD/FTP</span><span>LGPD</span><span>Suitability</span><span>Operações ilícitas</span><span>Segurança cibernética</span><span>PRSAC</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="trilha" class="view">
+        <div class="intro"><p class="eyebrow">23 CAPÍTULOS</p><h1>Trilha completa</h1><p class="muted">Abra um módulo para ver o que dominar, como estudar, fonte, foco de revisão e marcar seu progresso.</p></div>
+        <div class="filters">
+          <button class="filter active" data-priority="Todos">Todos</button>
+          <button class="filter" data-priority="P0">P0 — Núcleo</button>
+          <button class="filter" data-priority="P1">P1</button>
+          <button class="filter" data-priority="P2">P2</button>
+          <button class="filter" data-priority="P3">P3</button>
+        </div>
+        <div id="module-list" class="module-list"></div>
+      </section>
+
+      <section id="plano" class="view">
+        <div class="intro"><p class="eyebrow">PLANO ADAPTATIVO</p><h1>Seu cronograma até a prova</h1><p class="muted">Não existe obrigação de 8 semanas. O site distribui o conteúdo conforme os dias disponíveis e reserva a reta final para revisão e simulados.</p></div>
+        <div class="card planner-summary" id="planner-summary"></div>
+        <div id="weekly-plan" class="weekly-plan"></div>
+      </section>
+
+      <section id="flashcards" class="view">
+        <div class="intro"><p class="eyebrow">RECUPERAÇÃO ATIVA</p><h1>Flashcards</h1><p class="muted">Tente responder antes de revelar. Classifique a dificuldade para alimentar suas revisões.</p></div>
+        <div class="study-toolbar"><select id="flash-filter"></select><span id="flash-counter"></span></div>
+        <div class="flash-card">
+          <p class="eyebrow" id="flash-topic"></p>
+          <h2 id="flash-question"></h2>
+          <div id="flash-answer" class="answer hidden"></div>
+        </div>
+        <div class="actions">
+          <button id="reveal" class="secondary">Mostrar resposta</button>
+          <button class="rate" data-rate="Dificil">Difícil</button>
+          <button class="rate" data-rate="Medio">Médio</button>
+          <button class="rate" data-rate="Facil">Fácil</button>
+        </div>
+      </section>
+
+      <section id="questoes" class="view">
+        <div class="intro"><p class="eyebrow">TREINO</p><h1>Banco de questões</h1><p class="muted">Responda, confira a explicação e deixe os erros virarem seu material de revisão.</p></div>
+        <div class="study-toolbar"><select id="question-filter"></select><span id="q-counter"></span></div>
+        <div class="card question-card">
+          <p class="eyebrow" id="q-topic"></p>
+          <h2 id="q-text"></h2>
+          <div id="q-options"></div>
+          <div id="q-feedback" class="feedback hidden"></div>
+          <button id="next-q" class="primary hidden">Próxima questão</button>
+        </div>
+      </section>
+
+      <section id="erros" class="view">
+        <div class="intro"><p class="eyebrow">CADERNO DE ERROS</p><h1>O que precisa melhorar</h1><p class="muted">Aqui ficam as questões erradas e flashcards classificados como difíceis.</p></div>
+        <div id="error-list"></div>
+      </section>
+
+      <section id="fontes" class="view">
+        <div class="intro"><p class="eyebrow">MATERIAL CONFIÁVEL</p><h1>Fontes oficiais e complementares</h1><p class="muted">Use o PQO Study para aprender e estas fontes para confirmar regras, atualizações e materiais oficiais.</p></div>
+        <div id="source-list" class="source-list"></div>
+        <div class="notice">O conteúdo do PQO Study é um apoio didático. Em caso de divergência, prevalecem o Manual vigente, normas e comunicados oficiais.</div>
+      </section>
+    </main>
+  </div>
+
+  <div id="module-modal" class="overlay hidden">
+    <div class="modal module-modal">
+      <button id="close-module" class="close">×</button>
+      <p class="eyebrow" id="modal-code"></p>
+      <h1 id="modal-title"></h1>
+      <div id="modal-priority" class="badge"></div>
+
+      <div class="lesson-block lesson-summary">
+        <p class="eyebrow">APRENDA AQUI</p>
+        <h3>Resumo do módulo</h3>
+        <p id="modal-summary"></p>
+      </div>
+
+      <div class="lesson-block">
+        <h3>Pontos-chave para a prova</h3>
+        <ul id="modal-keypoints"></ul>
+      </div>
+
+      <div class="lesson-block">
+        <h3>O que você precisa dominar</h3>
+        <ul id="modal-topics"></ul>
+      </div>
+
+      <div class="lesson-block">
+        <h3>Como estudar</h3><p id="modal-method"></p>
+      </div>
+
+      <div class="lesson-block">
+        <h3>Foco da revisão</h3><p id="modal-review"></p>
+      </div>
+
+      <div class="lesson-block">
+        <p class="eyebrow">FONTES</p>
+        <h3>Onde estudar</h3>
+        <p id="modal-source"></p>
+        <div id="modal-links" class="module-links"></div>
+      </div>
+      
+      <div class="lesson-block module-practice-block">
+        <p class="eyebrow">PRATIQUE AQUI</p>
+        <h3>Flashcards deste módulo</h3>
+        <p class="muted">São 8 cartões de conteúdo. Tente responder antes de revelar.</p>
+        <div id="module-flash-progress" class="mini-progress"></div>
+        <div id="module-flash-area"></div>
+      </div>
+
+      <div class="lesson-block module-practice-block">
+        <p class="eyebrow">QUESTÕES</p>
+        <h3>Treino no estilo da prova</h3>
+        <p class="muted">Questões autorais para praticar conceitos do módulo. Não são questões oficiais da ANCORD/B3.</p>
+        <div id="module-q-progress" class="mini-progress"></div>
+        <div id="module-question-area"></div>
+      </div>
+
+      <div class="lesson-block module-result-block">
+        <p class="eyebrow">SEU RESULTADO</p>
+        <h3>Como você está neste módulo</h3>
+        <div id="module-result"></div>
+      </div>
+
+      <button id="toggle-module" class="primary conclude-btn">Marcar como concluído</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
