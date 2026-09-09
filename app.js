@@ -3,7 +3,7 @@ const defaultState={
   profile:null, completed:[],
   flashReviewed:0, flashRatings:{},
   answered:0, correct:0, errors:[],
-  moduleFlash:{}, moduleQuestions:{}, lastModule:null
+  moduleFlash:{}, moduleQuestions:{}, lastModule:null, reviewSchedule:{}, studySessions:0
 };
 
 function readLocalState(){
@@ -96,6 +96,36 @@ function makePlan(){
   return weeks;
 }
 
+
+function reviewInterval(rate){return rate==="Dificil"?1:rate==="Medio"?3:7}
+function scheduleReview(key,rate){
+  const due=new Date(); due.setDate(due.getDate()+reviewInterval(rate));
+  state.reviewSchedule[key]={rate,due:due.toISOString(),updatedAt:new Date().toISOString()};
+}
+function dueReviews(){
+  const now=Date.now();
+  return Object.entries(state.reviewSchedule||{}).filter(([,v])=>new Date(v.due).getTime()<=now);
+}
+function moduleAccuracy(id){
+  const qp=state.moduleQuestions?.[id], qs=moduleQs(id); if(!qp)return null;
+  const entries=Object.entries(qp.answers||{}); if(!entries.length)return null;
+  const ok=entries.filter(([i,a])=>qs[+i]&&qs[+i].correct===a).length;
+  return Math.round(ok/entries.length*100);
+}
+function priorityStats(priority){
+  const mods=MODULES.filter(m=>m.priority===priority); const vals=mods.map(m=>moduleAccuracy(m.id)).filter(v=>v!==null);
+  const done=mods.filter(m=>state.completed.includes(m.id)).length;
+  return {accuracy:vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0,done,total:mods.length,hasData:vals.length>0};
+}
+function renderAnalytics(){
+  const pp=$("#priority-performance"); if(pp) pp.innerHTML=["P0","P1","P2","P3"].map(p=>{const s=priorityStats(p);const score=s.hasData?s.accuracy:0;return `<div class="perf-row"><div><strong>${p}</strong><small>${s.done}/${s.total} módulos • ${s.hasData?score+"% nas questões":"sem questões ainda"}</small></div><div class="bar"><i style="width:${score}%"></i></div></div>`}).join("");
+  const sr=$("#smart-review"); if(sr){
+    const due=dueReviews(); const difficult=Object.entries(state.flashRatings||{}).filter(([,v])=>v==="Dificil").length;
+    const err=(state.errors||[]).length;
+    sr.innerHTML=`<div class="review-summary"><strong>${due.length}</strong><span>revisões vencidas hoje</span></div><p class="muted">${difficult} flashcard(s) difícil(eis) • ${err} erro(s) registrado(s)</p>${due.length?'<button class="secondary" id="review-now">Revisar agora</button>':'<p class="good-note">✓ Você está em dia com a repetição espaçada.</p>'}`;
+    const b=$("#review-now"); if(b)b.onclick=()=>go("flashcards");
+  }
+}
 function renderDashboard(){
   const done=state.completed.length,pct=Math.round(done/MODULES.length*100),days=daysLeft();
   $("#progress-pct").textContent=pct+"%";
@@ -106,7 +136,7 @@ function renderDashboard(){
   $("#pace-label").textContent=pace;
   $("#question-score").textContent=(state.answered?Math.round(state.correct/state.answered*100):0)+"%";
   $("#question-total").textContent=`${state.answered} respondidas`;
-  $("#reviews-due").textContent=Object.values(state.flashRatings).filter(x=>x==="Dificil").length;
+  $("#reviews-due").textContent=dueReviews().length;
   if(state.profile){
     $("#hello").textContent=`OLÁ, ${state.profile.name.toUpperCase()}`;
     $("#exam-date-label").textContent=fmtDate(new Date(state.profile.exam+"T12:00:00"));
@@ -179,6 +209,7 @@ function renderModuleFlash(){
     mp.seen[card.question]=true;
     mp.ratings[card.question]=btn.dataset.moduleRate;
     state.flashRatings[card.question]=btn.dataset.moduleRate;
+    scheduleReview(card.question,btn.dataset.moduleRate);
     state.flashReviewed++;
     mp.index=(idx+1)%cards.length;
     save();
@@ -308,7 +339,7 @@ function setupFlash(){
   $("#flash-filter").innerHTML=topics(FLASHCARDS,"topic").map(t=>`<option>${t}</option>`).join("");
   $("#flash-filter").onchange=()=>{currentFlash=$("#flash-filter").value==="Todos"?[...FLASHCARDS]:FLASHCARDS.filter(x=>x.topic===$("#flash-filter").value);flashIndex=0;renderFlash()};
   $("#reveal").onclick=()=>$("#flash-answer").classList.remove("hidden");
-  $$(".rate").forEach(b=>b.onclick=()=>{const key=currentFlash[flashIndex]?.question;if(key)state.flashRatings[key]=b.dataset.rate;state.flashReviewed++;save();flashIndex=(flashIndex+1)%currentFlash.length;renderFlash()});
+  $$(".rate").forEach(b=>b.onclick=()=>{const key=currentFlash[flashIndex]?.question;if(key){state.flashRatings[key]=b.dataset.rate;scheduleReview(key,b.dataset.rate)}state.flashReviewed++;save();flashIndex=(flashIndex+1)%currentFlash.length;renderFlash()});
   renderFlash();
 }
 function renderFlash(){
@@ -344,7 +375,13 @@ function renderErrors(){
 function renderSources(){
   $("#source-list").innerHTML=SOURCES.map(s=>`<article class="source-card"><p class="eyebrow">${s.type}</p><h3>${s.name}</h3><a href="${s.url}" target="_blank" rel="noopener">Abrir fonte ↗</a></article>`).join("");
 }
-function renderAll(){renderDashboard();renderModules();renderPlan();renderErrors();renderSources()}
+function renderAll(){renderDashboard();renderModules();renderPlan();renderErrors();renderSources();renderAnalytics()}
+
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;const b=$("#install-app");if(b)b.classList.remove("hidden")});
+const installBtn=$("#install-app");
+if(installBtn) installBtn.onclick=async()=>{if(!deferredInstallPrompt){alert("No iPhone, abra no Safari, toque em Compartilhar e depois em ‘Adicionar à Tela de Início’.");return}deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBtn.classList.add("hidden")};
+
 async function boot(){
   setupFlash();
   setupQ();

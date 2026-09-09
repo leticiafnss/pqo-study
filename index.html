@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#121826">
   <title>PQO Study — Compliance</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="PQO Study">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -58,6 +63,7 @@
         <button class="nav" data-view="fontes">↗ <span>Fontes oficiais</span></button>
       </nav>
       <div class="side-bottom">
+        <button id="install-app" class="ghost hidden">＋ Instalar aplicativo</button>
         <button id="edit-profile" class="ghost">⚙ Ajustar prova</button>
         <button id="logout-btn" class="ghost">↪ Sair da conta</button>
         <div class="sync-status" id="sync-status">● modo local</div>
@@ -102,6 +108,17 @@
             <div class="priority-list">
               <span>PLD/FTP</span><span>LGPD</span><span>Suitability</span><span>Operações ilícitas</span><span>Segurança cibernética</span><span>PRSAC</span>
             </div>
+          </article>
+        </div>
+
+        <div class="grid2 analytics-row">
+          <article class="card">
+            <div class="card-head"><div><p class="eyebrow">DOMÍNIO</p><h3>Desempenho por prioridade</h3></div></div>
+            <div id="priority-performance" class="performance-list"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><div><p class="eyebrow">REVISÃO INTELIGENTE</p><h3>O que revisar agora</h3></div><button class="text-btn" data-jump="erros">Abrir erros</button></div>
+            <div id="smart-review"></div>
           </article>
         </div>
       </section>
@@ -233,5 +250,8 @@
   <script src="config.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+  </script>
 </body>
 </html>
