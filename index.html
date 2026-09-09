@@ -19,7 +19,12 @@
       <div class="logo">P</div>
       <p class="eyebrow">PQO STUDY</p>
       <h1 id="auth-title">Entrar</h1>
-      <p class="muted" id="auth-description">Entre com sua conta para continuar exatamente de onde parou, no computador ou no celular.</p>
+      <p class="muted auth-intro" id="auth-description">Sua preparação para a certificação PQO em um só lugar: plano adaptado à data da prova, conteúdo guiado, prática, revisão e evolução acompanhada até o dia da certificação.</p>
+      <div class="auth-benefits">
+        <span>◷ Plano adaptativo</span>
+        <span>✓ Conteúdo + prática</span>
+        <span>↻ Progresso sincronizado</span>
+      </div>
       <label id="auth-name-wrap" class="hidden">Nome<input id="auth-name" placeholder="Seu nome"></label>
       <label>E-mail<input id="auth-email" type="email" placeholder="voce@email.com"></label>
       <label>Senha<input id="auth-password" type="password" placeholder="Mínimo de 6 caracteres"></label>
@@ -46,7 +51,7 @@
         <input id="profile-exam" type="date">
       </label>
       <button id="save-profile" class="primary">Criar meu plano</button>
-      <small>Versão inicial: o perfil fica salvo somente neste navegador. Uma conta sincronizada entre dispositivos será a próxima evolução.</small>
+      <small>Seu perfil e progresso são salvos no aparelho e sincronizados com sua conta quando houver internet.</small>
     </div>
   </div>
 
@@ -59,6 +64,7 @@
         <button class="nav" data-view="plano">◷ <span>Meu plano</span></button>
         <button class="nav" data-view="flashcards">◇ <span>Flashcards</span></button>
         <button class="nav" data-view="questoes">✓ <span>Questões</span></button>
+        <button class="nav nav-play" data-view="jogar">▶ <span>Jogar</span></button>
         <button class="nav" data-view="erros">! <span>Erros</span></button>
         <button class="nav" data-view="fontes">↗ <span>Fontes oficiais</span></button>
       </nav>
@@ -74,7 +80,7 @@
     <main>
       <header>
         <div><p class="eyebrow" id="hello">PREPARAÇÃO PQO</p><h2 id="page-title">Visão geral</h2></div>
-        <div class="exam-chip"><span>Prova</span><strong id="exam-date-label">—</strong></div>
+        <div class="header-actions"><div id="network-pill" class="network-pill"><span>●</span><b>Online</b></div><div class="exam-chip"><span>Prova</span><strong id="exam-date-label">—</strong></div></div>
       </header>
 
       <section id="dashboard" class="view active">
@@ -136,7 +142,7 @@
       </section>
 
       <section id="plano" class="view">
-        <div class="intro"><p class="eyebrow">PLANO ADAPTATIVO</p><h1>Seu cronograma até a prova</h1><p class="muted">Não existe obrigação de 8 semanas. O site distribui o conteúdo conforme os dias disponíveis e reserva a reta final para revisão e simulados.</p></div>
+        <div class="intro"><p class="eyebrow">PLANO ADAPTATIVO</p><h1>Seu cronograma até a prova</h1><p class="muted">Seu plano distribui o conteúdo conforme os dias disponíveis, prioriza os temas mais importantes e reserva a reta final para revisão e simulados.</p></div>
         <div class="card planner-summary" id="planner-summary"></div>
         <div id="weekly-plan" class="weekly-plan"></div>
       </section>
@@ -169,6 +175,44 @@
         </div>
       </section>
 
+      <section id="jogar" class="view game-view">
+        <div class="game-hero">
+          <div class="game-hero-copy">
+            <p class="eyebrow">PQO ARENA</p>
+            <h1>Aprender jogando.</h1>
+            <p>Escolha um desafio. As partidas usam o mesmo conteúdo dos seus módulos e dão mais espaço aos assuntos em que você precisa reforçar.</p>
+            <div class="game-profile-strip">
+              <div><span>Nível</span><strong id="game-level">1</strong></div>
+              <div class="xp-grow"><span>XP</span><div class="xp-track"><i id="game-xp-bar"></i></div><small id="game-xp-text">0 / 250 XP</small></div>
+              <div><span>Sequência</span><strong id="game-streak">0 🔥</strong></div>
+            </div>
+          </div>
+          <div class="game-orb" aria-hidden="true"><span>▶</span><b>PQO</b></div>
+        </div>
+
+        <div id="daily-mission" class="daily-mission"></div>
+
+        <div class="game-mode-grid">
+          <button class="game-mode-card survival" data-game="survival">
+            <span class="game-icon">❤</span><div><small>SOBREVIVÊNCIA</small><h3>3 vidas. Até onde você vai?</h3><p>Errou, perde uma vida. Faça a maior sequência possível.</p></div><b>Jogar →</b>
+          </button>
+          <button class="game-mode-card lightning" data-game="lightning">
+            <span class="game-icon">⚡</span><div><small>RELÂMPAGO</small><h3>60 segundos de foco total</h3><p>Responda o máximo que conseguir antes do tempo acabar.</p></div><b>Jogar →</b>
+          </button>
+          <button class="game-mode-card match" data-game="match">
+            <span class="game-icon">↔</span><div><small>FAÇA A ASSOCIAÇÃO</small><h3>Conceito ↔ definição</h3><p>Reconheça rapidamente os conceitos que costumam se confundir.</p></div><b>Jogar →</b>
+          </button>
+          <button class="game-mode-card boss" data-game="boss">
+            <span class="game-icon">♛</span><div><small>CHEFÃO P0</small><h3>O núcleo de Compliance</h3><p>12 questões só dos assuntos de maior prioridade para sua certificação.</p></div><b>Enfrentar →</b>
+          </button>
+        </div>
+
+        <div class="game-dashboard-grid">
+          <article class="card"><div class="card-head"><div><p class="eyebrow">RECORDES</p><h3>Seus melhores resultados</h3></div></div><div id="game-records" class="game-records"></div></article>
+          <article class="card"><div class="card-head"><div><p class="eyebrow">CONQUISTAS</p><h3>Medalhas desbloqueadas</h3></div></div><div id="game-achievements" class="achievement-grid"></div></article>
+        </div>
+      </section>
+
       <section id="erros" class="view">
         <div class="intro"><p class="eyebrow">CADERNO DE ERROS</p><h1>O que precisa melhorar</h1><p class="muted">Aqui ficam as questões erradas e flashcards classificados como difíceis.</p></div>
         <div id="error-list"></div>
@@ -180,6 +224,13 @@
         <div class="notice">O conteúdo do PQO Study é um apoio didático. Em caso de divergência, prevalecem o Manual vigente, normas e comunicados oficiais.</div>
       </section>
     </main>
+  </div>
+
+  <div id="game-modal" class="overlay hidden game-overlay">
+    <div class="modal game-modal">
+      <button id="close-game" class="close game-close">×</button>
+      <div id="game-screen"></div>
+    </div>
   </div>
 
   <div id="module-modal" class="overlay hidden">
