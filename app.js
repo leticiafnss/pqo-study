@@ -93,7 +93,16 @@ function renderAuthMode(){
   document.querySelector("#auth-toggle").textContent=s?"Já tenho uma conta":"Ainda não tenho conta";
   document.querySelector("#auth-message").classList.add("hidden");
 }
-async function initAuth(){const overlay=document.querySelector("#auth-overlay");if(!cloudEnabled){setSyncStatus(navigator.onLine?"● modo local":"● offline — salvo neste aparelho");overlay.classList.add("hidden");return}const {data:{session}}=await supabaseClient.auth.getSession();currentUser=session?.user||null;if(currentUser){overlay.classList.add("hidden");await loadCloudState()}else{overlay.classList.remove("hidden");setSyncStatus("● desconectado")}supabaseClient.auth.onAuthStateChange(async(event,session)=>{currentUser=session?.user||null;if(event==="SIGNED_IN"&&currentUser){overlay.classList.add("hidden");await loadCloudState()}if(event==="SIGNED_OUT"){currentUser=null;setSyncStatus("● desconectado");overlay.classList.remove("hidden")}});document.querySelector("#auth-toggle").onclick=()=>{authMode=authMode==="login"?"signup":"login";renderAuthMode()};document.querySelector("#auth-submit").onclick=async()=>{const email=document.querySelector("#auth-email").value.trim(),password=document.querySelector("#auth-password").value,name=document.querySelector("#auth-name").value.trim();if(!email||!password){showAuthMessage("Preencha e-mail e senha.");return}if(password.length<6){showAuthMessage("Use uma senha com pelo menos 6 caracteres.");return}if(authMode==="signup"){if(!name){showAuthMessage("Preencha seu nome.");return}const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{name}}});if(error)showAuthMessage("Não foi possível criar a conta: "+error.message);else showAuthMessage(data.session?"Conta criada e conectada.":"Conta criada. Confira seu e-mail para confirmar o cadastro e depois faça login.",true)}else{const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)showAuthMessage("Não foi possível entrar. Confira e-mail e senha.")}};document.querySelector("#logout-btn").onclick=async()=>{await supabaseClient.auth.signOut()};}
+function friendlyAuthError(error,mode="login"){
+  const msg=(error?.message||"").toLowerCase();
+  if(msg.includes("rate limit"))return "Muitas tentativas foram feitas em pouco tempo. Aguarde alguns minutos e tente novamente.";
+  if(msg.includes("already registered")||msg.includes("already been registered"))return "Este e-mail já possui uma conta. Tente entrar com sua senha.";
+  if(msg.includes("invalid login credentials"))return "E-mail ou senha incorretos.";
+  if(msg.includes("email not confirmed"))return "Seu e-mail ainda precisa ser confirmado antes do login.";
+  if(msg.includes("password"))return "Não foi possível usar essa senha. Use pelo menos 6 caracteres.";
+  return mode==="signup"?"Não foi possível criar a conta agora. Tente novamente em alguns instantes.":"Não foi possível entrar. Confira e-mail e senha.";
+}
+async function initAuth(){const overlay=document.querySelector("#auth-overlay");if(!cloudEnabled){setSyncStatus(navigator.onLine?"● modo local":"● offline — salvo neste aparelho");overlay.classList.add("hidden");return}const {data:{session}}=await supabaseClient.auth.getSession();currentUser=session?.user||null;if(currentUser){overlay.classList.add("hidden");await loadCloudState()}else{overlay.classList.remove("hidden");setSyncStatus("● desconectado")}supabaseClient.auth.onAuthStateChange(async(event,session)=>{currentUser=session?.user||null;if(event==="SIGNED_IN"&&currentUser){overlay.classList.add("hidden");await loadCloudState()}if(event==="SIGNED_OUT"){currentUser=null;setSyncStatus("● desconectado");overlay.classList.remove("hidden")}});document.querySelector("#auth-toggle").onclick=()=>{authMode=authMode==="login"?"signup":"login";renderAuthMode()};document.querySelector("#auth-submit").onclick=async()=>{const email=document.querySelector("#auth-email").value.trim(),password=document.querySelector("#auth-password").value,name=document.querySelector("#auth-name").value.trim();if(!email||!password){showAuthMessage("Preencha e-mail e senha.");return}if(password.length<6){showAuthMessage("Use uma senha com pelo menos 6 caracteres.");return}if(authMode==="signup"){if(!name){showAuthMessage("Preencha seu nome.");return}const {data,error}=await supabaseClient.auth.signUp({email,password,options:{data:{name}}});if(error)showAuthMessage(friendlyAuthError(error,"signup"));else showAuthMessage(data.session?"Conta criada e conectada.":"Conta criada. Confira seu e-mail para confirmar o cadastro e depois faça login.",true)}else{const {error}=await supabaseClient.auth.signInWithPassword({email,password});if(error)showAuthMessage("Não foi possível entrar. Confira e-mail e senha.")}};document.querySelector("#logout-btn").onclick=async()=>{await supabaseClient.auth.signOut()};}
 
 let currentModule=null, flashIndex=0, qIndex=0, currentFlash=[...FLASHCARDS], currentQ=[...QUESTIONS];
 
@@ -102,6 +111,11 @@ const fmtDate=d=>new Intl.DateTimeFormat("pt-BR").format(d);
 
 function openProfile(){
   $("#onboarding").classList.remove("hidden");
+  const editing=Boolean(state.profile);
+  const title=$("#onboarding h1"),desc=$("#onboarding .muted"),btn=$("#save-profile");
+  if(title)title.textContent=editing?"Ajuste sua data da prova":"Monte sua trilha de Compliance";
+  if(desc)desc.textContent=editing?"Altere a data e o PQO Study recalcula seu plano automaticamente. Módulos concluídos, questões, erros, XP e revisões continuam salvos.":"Informe seus dados e a data da prova. O plano se adapta automaticamente ao tempo que você tem.";
+  if(btn)btn.textContent=editing?"Salvar e recalcular meu plano":"Criar meu plano";
   if(state.profile){
     $("#profile-name").value=state.profile.name||"";
     $("#profile-email").value=state.profile.email||"";
@@ -113,9 +127,13 @@ function initProfile(){
   $("#save-profile").onclick=()=>{
     const name=$("#profile-name").value.trim(),email=$("#profile-email").value.trim(),exam=$("#profile-exam").value;
     if(!name||!email||!exam){alert("Preencha nome, e-mail e data da prova.");return}
-    state.profile={name,email:currentUser?.email||email,exam};save();$("#onboarding").classList.add("hidden");
+    const previousExam=state.profile?.exam||null;
+    state.profile={...(state.profile||{}),name,email:currentUser?.email||email,exam,examUpdatedAt:new Date().toISOString()};
+    save();$("#onboarding").classList.add("hidden");
+    if(previousExam && previousExam!==exam){go("plano");setTimeout(()=>alert("Data atualizada! Seu cronograma foi recalculado. Seu progresso anterior foi mantido."),50)}
   };
   $("#edit-profile").onclick=openProfile;
+  const planChange=$("#change-exam-date");if(planChange)planChange.onclick=openProfile;
 }
 
 function go(view){
@@ -385,6 +403,7 @@ $("#toggle-module").onclick=()=>{
 
 function renderPlan(){
   const days=daysLeft(), plan=makePlan();
+  const planDate=$("#plan-exam-date");if(planDate)planDate.textContent=state.profile?.exam?fmtDate(new Date(state.profile.exam+"T12:00:00")):"Defina sua data";
   if(days===null){$("#planner-summary").innerHTML="<p>Defina a data da prova para gerar o cronograma.</p>";$("#weekly-plan").innerHTML="";return}
   const weeks=plan.length, intensity=days<14?"intensivo":days<35?"acelerado":"equilibrado";
   const totalPlanModules=MODULES.length;

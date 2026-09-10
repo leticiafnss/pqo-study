@@ -1,4 +1,4 @@
-const CACHE="pqo-study-v3-1";
+const CACHE="pqo-study-v3-2";
 const CORE=[
   "./","./index.html","./style.css","./data.js","./app.js","./config.js",
   "./manifest.webmanifest","./icons/icon-192.png","./icons/icon-512.png"
